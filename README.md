@@ -2,6 +2,7 @@
   <p align="center">
   <img src="https://github.com/artrivas/db2-project3/blob/main/imgs/database_logo.png" width="60%">
   </p>
+  
 ## Organización del equipo
 
 |            Participante             |   Rol   |
@@ -9,7 +10,7 @@
 |  Stuart Diego Arteaga Montes        |  Backend  |
 |  Johan Fabian Callinapa Chunga      |  Frontend|
 |  Dimael Rivas                        | Backend |
-|  Kelvin                         | Backend |
+|  Kelvin Andrei Cahuana Condori       | Backend |
 
 ## Proyecto parte 2 
   
@@ -230,16 +231,13 @@ def create_index(tablename='product'):
 Tiempo de ejecución promedio en ms.
 | N (registros) | PostgreSQL Index | MyIndex |
 |-----------|-----------|-----------|
-| 1000   |  1.351 ms   |  141.44 ms |
-| 2000   |  2.664 ms  |  154.774 ms   |
-| 4000   |  4.060 ms |  162.761 ms |
-| 8000   |  9.645 ms  |  169.530 ms  |
-| 16000   | 17.976 ms  | 175.382 ms|
-| 32000   |  34.365 ms |   182.124 ms|
-| 38000   |  39.454 ms|   186.397 ms|
-| 44424   |  45.033 ms |  190.282 ms  |
+| 1000   |  1.351 ms   |  70.94 ms |
+| 2000   |  2.664 ms  |  77.774 ms   |
+| 4000   |  4.060 ms |  81.761 ms |
+| 8000   |  9.645 ms  |  85.530 ms  |
+| 16000   | 17.976 ms  | 88.382 ms|
 
-![comparacion_time](img/grafico.png)
+![comparacion_time](img/grafico)
 
 ### Conclusión
 * Se realizó un uso de memoria eficiente para la construción del índice invertido
