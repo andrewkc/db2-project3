@@ -239,7 +239,7 @@ Tiempo de ejecución promedio en ms.
 | 38000   |  39.454 ms|   186.397 ms|
 | 44424   |  45.033 ms |  190.282 ms  |
 
-![comparacion_time](img/grafico.png)
+![comparacion_time](img/grafico)
 
 ### Conclusión
 * Se realizó un uso de memoria eficiente para la construción del índice invertido
