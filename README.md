@@ -36,7 +36,7 @@ El dominio de datos esta definido por la siguiente conjunto de datos: [Spotify S
  Este dataset cuenta con 18,000 canciones de Spotify
  #### Para busquedas con formato de audio
  Por medio del uso de la api de [spotify](https://github.com/spotify-api/spotify-api.js/) y la biblioteca [spotdl](https://github.com/spotDL/spotify-downloader) se lograron descargar un conjunto de canciones de tamaño 5000.
- Cabe resaltar que ambos datasets no se limitan a un solo idioma, y para mas informacion de como se logro descargar las canciones, vea el apendice A.
+ Cabe resaltar que ambos datasets no se limitan a un solo idioma, y para mas informacion de como se logro descargar las canciones, vea la parte 3.
  ## Busqueda textual
  ### Construccion del indice invertido
  #### Preprocesamiento
