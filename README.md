@@ -14,7 +14,7 @@
 
 ## Proyecto parte 3
 
-![API DE SPOTIFY ]()
+![API DE SPOTIFY ](img/spotify.png)
 
 ### Obtención de links de canciones 
 ```python
@@ -167,8 +167,9 @@ df.to_csv('spotify/caracteristicas.csv', index=False)
 ```
 
 ### Implementación de busquedas :
+![imagenes ](img/lupa.jpg)
 
-Pra poder realizar las búsquedas propuestas se abrió el archivo csv, previamente mencionado y se dividió entre etiquetas y caracteristicas además se normalizaron los datos para un mejor resultado.
+Para poder realizar las búsquedas propuestas se abrió el archivo csv, previamente mencionado y se dividió entre etiquetas y caracteristicas además se normalizaron los datos para un mejor resultado.
 
 ```python
 data = pd.read_csv('caracteristicas.csv')
@@ -240,7 +241,7 @@ class RtreeIndex:
 ```
 
 #### Búsqueda usando la librería faiss :
-![Librería faiss ]()
+![Librería faiss ](img/faiss.png)
 
 FAISS es una biblioteca desarrollada por Facebook para la búsqueda eficiente de similitudes en grandes conjuntos de datos. Está especialmente diseñada para trabajar con vectores de alta dimensionalidad, como los que se encuentran comúnmente en problemas de aprendizaje profundo y recuperación de información. A continuación, se presentan algunos aspectos clave de la biblioteca FAISS:
 1. Recuperación de Similitud:
