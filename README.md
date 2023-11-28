@@ -266,7 +266,7 @@ index.train(X)
 index.add(X)
 ```
 Búsqueda:
-```
+```python
 def knn_faiss(query_object, k):
     query_object = query_object.astype('float32')
     distances, indices = index.search(np.expand_dims(query_object, axis=0), k)
