@@ -204,7 +204,7 @@ def cos_Similarity(self, query, cosine_docs):
  ```
 ### Diseño del índice con PostgreSQL
 ```python
-def create_index(tablename='product'):
+def create_index(lang, tablename='public.music'):
     conn = psycopg2.connect(
         host=getenv("HOST"),
         port=getenv("PORT"),
@@ -218,9 +218,9 @@ def create_index(tablename='product'):
 
     cursor.execute(f"ALTER TABLE {tablename} ADD COLUMN indexed tsvector;")
     cursor.execute(f"""UPDATE {tablename} SET indexed = T.indexed FROM (
-                    SELECT id, setweight(to_tsvector('english', name), 'A') || setweight(to_tsvector('english', content), 'B') AS indexed FROM {tablename}
+                    SELECT id, setweight(to_tsvector('{lang}', name), 'A') || setweight(to_tsvector('{lang}', content), 'B') AS indexed FROM {tablename}
                    ) AS T WHERE {tablename}.id = T.id;""")
-    cursor.execute('CREATE INDEX IF NOT EXISTS content_idx_gin ON product USING gin (indexed);')
+    cursor.execute(f'CREATE INDEX IF NOT EXISTS content_idx_gin ON {tablename} USING gin (indexed);')
 
     conn.commit()
     cursor.close()
