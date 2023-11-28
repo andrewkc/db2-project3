@@ -1,6 +1,5 @@
 <template>
   <div class="recommendation-panel" v-if="isTrackPlayed">
-    <!-- Menú desplegable y campo de entrada solo si se ha reproducido una canción -->
     <div v-if="isTrackPlayed">
       <select v-model="selectedEndpoint">
         <option value="sequential/knn">Sequential KNN</option>
@@ -28,10 +27,7 @@ import axios from 'axios';
 export default {
   
   watch: {
-    // isTrackPlayed(newVal) {
-    //   console.log('isTrackPlayed changed:', newVal);
-    // },
-    
+
     'recommendations.length'(newLength) {
       console.log('recommendations length changed:', newLength);
     },
@@ -62,7 +58,7 @@ export default {
     },
     csvFilePath: {
       type: String,
-      default: 'D:/final_spotify.csv', // Ruta al archivo CSV
+      default: 'D:/final_spotify.csv', 
     }
     
   },
@@ -72,8 +68,8 @@ export default {
     selectedEndpoint: 'sequential/knn',
     parameter: 3,
     songNamesMap: {},
-    isPlaying: false, // Agrega esta propiedad
-    currentPlayer: null, // Para almacenar el reproductor de audio actual
+    isPlaying: false, 
+    currentPlayer: null, 
   };
 },
 
@@ -98,21 +94,16 @@ export default {
     
     let trackIds = [];
     if (this.selectedEndpoint === 'sequential/knn') {
-      // Caso para knn secuencial
       trackIds = response.data.content.map(item => item[0]);
     } else if (this.selectedEndpoint === 'sequential/range' || this.selectedEndpoint === 'highd/knn') {
-      // Caso para knn rango y high d
       trackIds = response.data.content.map(item => item[1]);
     } else if (this.selectedEndpoint === 'rtree/knn') {
-      // Caso para rtree
       trackIds = response.data.content;
     }
 
-    // Remover la extensión .mp3 y actualizar las recomendaciones
     this.recommendations = trackIds.map(trackIdWithExtension => {
       return {
         trackId: trackIdWithExtension.replace('.mp3', ''),
-        // Agrega aquí lógica adicional si necesitas más datos de cada recomendación
       };
     });
 
@@ -125,17 +116,14 @@ export default {
     
 playTrack(track) {
   if (this.isPlaying && this.currentPlayer && this.currentPlayer.src === `http://127.0.0.1:8000/music/${track.trackId}.mp3`) {
-    // Detener la reproducción si la misma canción ya está sonando
     this.currentPlayer.pause();
     this.isPlaying = false;
     this.currentPlayer = null;
   } else {
     if (this.isPlaying && this.currentPlayer) {
-      // Si se está reproduciendo otra pista, detenerla
       this.currentPlayer.pause();
     }
 
-    // Crear un nuevo reproductor para la pista actual
     this.currentPlayer = new Audio(`http://127.0.0.1:8000/music/${track.trackId}.mp3`);
     this.currentPlayer.play();
     this.isPlaying = true;
@@ -144,24 +132,18 @@ playTrack(track) {
 
         
         getSongName(trackId) {
-      // Retorna el nombre de la canción basado en el trackId
       return this.songNamesMap[trackId] || 'Nombre Desconocido';
     },
 
     async loadCsvData() {
   try {
-    // URL del archivo CSV
     const csvUrl = 'https://raw.githubusercontent.com/johancalli/test/main/final_spotify.csv';
     
-    // Realizar la petición GET para obtener los datos del CSV
     const response = await axios.get(csvUrl);
 
-    // Los datos del CSV se encuentran en response.data
     const csvData = response.data;
 
-    // Procesar el CSV y actualizar songNamesMap
     csvData.split('\n').forEach((line, index) => {
-      // Ignorar la cabecera
       if (index === 0) return;
 
       const columns = line.split(',');
@@ -169,7 +151,6 @@ playTrack(track) {
       const trackName = columns[1];
       const trackArtist = columns[2];
 
-      // Puedes ajustar esta parte según cómo quieras mostrar los nombres
       this.songNamesMap[trackId] = `${trackName} - ${trackArtist}`;
     });
   } catch (error) {

@@ -20,7 +20,6 @@
   
   <style>
   .player {
-    /* Estilos para tu reproductor */
   }
   </style>
   
