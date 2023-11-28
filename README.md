@@ -337,15 +337,17 @@ Representa el tempo estimado de una señal de audio.
 #### Coeficientes MFCC (Mel-Frequency Cepstral Coefficients):
 Representan la forma en que el espectro de frecuencia de una señal de audio varía con el tiempo.
 ```python
-    tempo, tempogram = librosa.beat.beat_track(y=audio, sr=sr)
+   mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=20)
 ```
 Ademas se uso sus variaciones 
 ##### Delta MFCC y Delta Delta MFCC
 Representan las tasas de cambio de los coeficientes MFCC a lo largo del tiempo.
 
 ```python
+
     delta_mfccs = librosa.feature.delta(mfccs)
     delta2_mfccs = librosa.feature.delta(mfccs, order=2)
+
 ```
 
 Y para extraer todas estas características de una canción se uso la siguiente función
