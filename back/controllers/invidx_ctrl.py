@@ -15,9 +15,13 @@ async def get_knn_invidx(query: str = Form(...), k: str = Form(...), language: s
             df = results.copy()  
             df['scores'] = scores
             res = df.to_dict(orient='index')
-            
+
+            ress = {}
+            for k, v in res.items():
+                ress[v['track_id']] = v          
+                
         return {
-            'content': res, 
+            'content': ress, 
             'execution_time': f"{execution_time} ms", 
             'status_code': 200
         }

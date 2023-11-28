@@ -28,7 +28,7 @@ class RTreeHandler:
             new_data.append(data.iloc[i][:-1])
         scaler = StandardScaler()
         data_scaled = scaler.fit_transform(new_data)
-        pca = PCA(n_components=100)
+        pca = PCA(n_components=100) #100
         data_pca = pca.fit_transform(data_scaled)
         new_data_pca =[]
         for i in range(len(data_pca)):
