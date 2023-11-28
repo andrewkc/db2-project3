@@ -135,7 +135,6 @@ Acciones:
 1.- Se empieza a leer bloque por bloque
 2.- Se juntan los bloques con el fin de generar un indice global
 
-
 ### Consultas / Busqueda
 En este proyecto para el calculo de similitud usamos los pesos ```TF-IDF```, cuales procedimientos de calculo se encuentran en ```invert_index.py```, pero en general este es el procedimiento:
 
@@ -216,6 +215,7 @@ def create_index(lang, tablename='public.music'):
     cursor = conn.cursor()
     cursor.execute('CREATE EXTENSION IF NOT EXISTS pg_trgm;')
 
+    # 'track_name', 'track_artist', 'lyrics', 'track_album_name','playlist_genre', 'playlist_subgenre', 'language'
     cursor.execute(f"ALTER TABLE {tablename} ADD COLUMN indexed tsvector;")
     cursor.execute(f"""UPDATE {tablename} SET indexed = T.indexed FROM (
                     SELECT id, setweight(to_tsvector('{lang}', name), 'A') || setweight(to_tsvector('{lang}', content), 'B') AS indexed FROM {tablename}
