@@ -410,7 +410,7 @@ scaler = StandardScaler()
 X = scaler.fit_transform(X)
 ```
 
-#### KNN SECUENCIAL CON HEAP :
+#### KNN SECUENCIAL CON PRIORITY QUEUE:
 
 ```python
 def knn_search_priority_queue(query, k):
