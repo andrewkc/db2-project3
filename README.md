@@ -1,7 +1,7 @@
 # PROYECTO FINAL 2 Y 3 BASE DE DATOS II 
 ## Organización del equipo
 
-|            Participante             |   Papel   |
+|            Participante             |   Rol   |
 |:-----------------------------------:|:---------:|
 |  Stuart Diego Arteaga Montes        |  Backend  |
 |  Johan Fabian Callinapa Chunga      |  Frontend|
@@ -252,7 +252,7 @@ Una de las características distintivas de FAISS es su capacidad para aprovechar
 4. Algoritmos Optimizados:
 FAISS implementa algoritmos optimizados para la búsqueda eficiente en espacios de alta dimensión. Esto incluye métodos para reducir el costo computacional de operaciones como la distancia euclidiana en dimensiones elevadas.
 
-Implementación :
+Indexación :
 ```python
 import  faiss
 X = data.iloc[:, :-1].values.astype('float32')  
@@ -264,6 +264,13 @@ quantizer = faiss.IndexFlatL2(dimension)
 index = faiss.IndexIVFFlat(quantizer, dimension, nlist, faiss.METRIC_L2)
 index.train(X)
 index.add(X)
+```
+Búsqueda:
+```
+def knn_faiss(query_object, k):
+    query_object = query_object.astype('float32')
+    distances, indices = index.search(np.expand_dims(query_object, axis=0), k)
+    return [(distances[0][i], data.iloc[indices[0][i]]['Nombre']) for i in range(k)]
 ```
 * Para esta implementación se uso el índice **IndexIVFFlat**, aquí hay una explicación de cómo funciona el índice IndexIVFFlat:
 1. Creación del Cuantizador (Quantizer):
