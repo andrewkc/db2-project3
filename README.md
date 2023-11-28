@@ -201,7 +201,51 @@ def cos_Similarity(self, query, cosine_docs):
         scores = scores[:k]
         return data.iloc[matching_indices], scores_values, execution_time
  ```
+### Diseño del índice con PostgreSQL
+```python
+def create_index(tablename='product'):
+    conn = psycopg2.connect(
+        host=getenv("HOST"),
+        port=getenv("PORT"),
+        dbname=getenv("DBNAME"),
+        user=getenv("USER"),
+        password=getenv("PASSWORD")
+    )
 
+    cursor = conn.cursor()
+    cursor.execute('CREATE EXTENSION IF NOT EXISTS pg_trgm;')
+
+    cursor.execute(f"ALTER TABLE {tablename} ADD COLUMN indexed tsvector;")
+    cursor.execute(f"""UPDATE {tablename} SET indexed = T.indexed FROM (
+                    SELECT id, setweight(to_tsvector('english', name), 'A') || setweight(to_tsvector('english', content), 'B') AS indexed FROM {tablename}
+                   ) AS T WHERE {tablename}.id = T.id;""")
+    cursor.execute('CREATE INDEX IF NOT EXISTS content_idx_gin ON product USING gin (indexed);')
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+```
+### Experimentación
+### Tablas y gráficos de los resultados
+Tiempo de ejecución promedio en ms.
+| N (registros) | PostgreSQL Index | MyIndex |
+|-----------|-----------|-----------|
+| 1000   |  1.351 ms   |  141.44 ms |
+| 2000   |  2.664 ms  |  154.774 ms   |
+| 4000   |  4.060 ms |  162.761 ms |
+| 8000   |  9.645 ms  |  169.530 ms  |
+| 16000   | 17.976 ms  | 175.382 ms|
+| 32000   |  34.365 ms |   182.124 ms|
+| 38000   |  39.454 ms|   186.397 ms|
+| 44424   |  45.033 ms |  190.282 ms  |
+
+![comparacion_time](assets/comparacion_time.png)
+
+### Conclusión
+* Se realizó un uso de memoria eficiente para la construción del índice invertido
+* Se creo el índice de postgres considerando distintos pesos, se dio más peso al nombre del producto que al contenido (todos los demás campos concatenados).
+* Al realizar la comparación de tiempos de ejecución se evidencio que el índice de postgres es mejor que el nuestro.
+  
 ## Proyecto parte 3
 
 ![API DE SPOTIFY ](img/spotify.png)
