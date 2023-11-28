@@ -1,36 +1,39 @@
 <template>
-    <div class="search-panel">
-      <form @submit.prevent="onSearch">
-        <input type="text" v-model="searchQuery" placeholder="Buscar canciones" />
-  
-        <select v-model="searchLanguage">
-          <option value="">Cualquier idioma</option>
-  <option value="es">Español</option>
-  <option value="en">Inglés</option>
-  <option value="de">Alemán</option> 
-  <option value="it">Italiano</option> 
-  <option value="pt">Portugués</option> 
+  <div class="search-panel">
+    <form @submit.prevent="onSearch">
+      <input type="text" v-model="searchQuery" placeholder="Buscar canciones" />
 
-          
-        </select>
-  
-        <input type="number" v-model.number="resultLimit" placeholder="Número de resultados" />
-  
-        <button type="submit">Buscar</button>
-      </form>
-  
-      <ul v-if="searchResults.length">
-    <li v-for="track in searchResults" :key="track.track_id">
-      <div>
-        <p>{{ track.track_name }} - {{ track.track_artist }}</p>
-        <p>{{ getLyricsPreview(track.lyrics) }}</p>
-      </div>
-      <button @click="playTrack(track)">{{ buttonText }}</button>
-    </li>
-  </ul>
-    </div>
-  </template>
-  
+      <select v-model="searchLanguage">
+        <option value="">Cualquier idioma</option>
+        <option value="es">Español</option>
+        <option value="en">Inglés</option>
+        <option value="de">Alemán</option> 
+        <option value="it">Italiano</option> 
+        <option value="pt">Portugués</option>
+      </select>
+
+      <select v-model="searchEndpoint">
+        <option value="invidx">Índice Invidx</option>
+        <option value="gin">Índice Gin</option>
+      </select>
+
+      <input type="number" v-model.number="resultLimit" placeholder="Número de resultados" />
+
+      <button type="submit">Buscar</button>
+    </form>
+
+    <ul v-if="searchResults.length">
+      <li v-for="track in searchResults" :key="track.track_id">
+        <div>
+          <p>{{ track.track_name }} - {{ track.track_artist }}</p>
+          <p>{{ getLyricsPreview(track.lyrics) }}</p>
+        </div>
+        <button @click="playTrack(track)">{{ buttonText }}</button>
+      </li>
+    </ul>
+  </div>
+</template>
+
   <script>
   
   
@@ -47,33 +50,34 @@
         searchLanguage: '',
         resultLimit: 10,
         searchResults: [], 
+        searchEndpoint: 'invidx',
       };
     },
     methods: {
       async onSearch() {
-        const payload = new FormData();
-        payload.append('query', this.searchQuery);
-        payload.append('k', this.resultLimit.toString());
-  
-        const languageMap = {
-  es: 'spanish',
-  en: 'english',
-  de: 'german',
-  it: 'italian',
-  pt: 'portuguese'
-};
+      const payload = new FormData();
+      payload.append('query', this.searchQuery);
+      payload.append('k', this.resultLimit.toString());
 
-const languageToSend = languageMap[this.searchLanguage] || 'defaultLanguage';
-payload.append('language', languageToSend);
-        payload.append('language', languageToSend);
-  
-        try {
-          const response = await axios.post('http://localhost:8000/invidx/knn', payload);
-          this.searchResults = Object.values(response.data.content);
-        } catch (error) {
-          console.error('Error en la búsqueda:', error);
-        }
-      },
+      const languageMap = {
+        es: 'spanish',
+        en: 'english',
+        de: 'german',
+        it: 'italian',
+        pt: 'portuguese'
+      };
+
+      const languageToSend = languageMap[this.searchLanguage] || 'defaultLanguage';
+      payload.append('language', languageToSend);
+
+      try {
+        const endpoint = this.searchEndpoint === 'gin' ? 'gin/knn' : 'invidx/knn';
+        const response = await axios.post(`http://localhost:8000/${endpoint}`, payload);
+        this.searchResults = Object.values(response.data.content);
+      } catch (error) {
+        console.error('Error en la búsqueda:', error);
+      }
+    },
       playTrack(track) {
             if (this.isPlaying && this.currentPlayer && this.currentPlayer.src === `http://127.0.0.1:8000/music/${track.track_id}.mp3`) {
                 this.currentPlayer.pause();
