@@ -10,7 +10,7 @@
 |  Stuart Diego Arteaga Montes        |  Backend  |
 |  Johan Fabian Callinapa Chunga      |  Frontend|
 |  Dimael Rivas                        | Backend |
-|  Kelvin                         | Backend |
+|  Kelvin Andrei Cahuana Condori       | Backend |
 
 ## Proyecto parte 2 
   
