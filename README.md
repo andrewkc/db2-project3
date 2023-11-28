@@ -2,6 +2,7 @@
   <p align="center">
   <img src="https://github.com/artrivas/db2-project3/blob/main/imgs/database_logo.png" width="60%">
   </p>
+  
 ## Organización del equipo
 
 |            Participante             |   Rol   |
@@ -235,9 +236,6 @@ Tiempo de ejecución promedio en ms.
 | 4000   |  4.060 ms |  162.761 ms |
 | 8000   |  9.645 ms  |  169.530 ms  |
 | 16000   | 17.976 ms  | 175.382 ms|
-| 32000   |  34.365 ms |   182.124 ms|
-| 38000   |  39.454 ms|   186.397 ms|
-| 44424   |  45.033 ms |  190.282 ms  |
 
 ![comparacion_time](img/grafico)
 
