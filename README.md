@@ -1,4 +1,7 @@
 # PROYECTO FINAL 2 Y 3 BASE DE DATOS II 
+  <p align="center">
+  <img src="https://github.com/artrivas/db2-project3/blob/main/imgs/database_logo.png" width="60%">
+  </p>
 ## Organización del equipo
 
 |            Participante             |   Rol   |
@@ -9,8 +12,195 @@
 |  Kelvin                         | Backend |
 
 ## Proyecto parte 2 
+  
+ ## Introduccion
+  
+En la era digital, encontrar canciones similares representa un desafío debido a la inmensa variedad de música disponible y la subjetividad en gustos musicales. A pesar de los avances tecnológicos, la búsqueda se ve obstaculizada por la complejidad de la percepción auditiva y las diferencias individuales, lo que hace que identificar similitudes musicales sea una tarea compleja y fascinante a la vez.
+ 
+ ### Objetivo del proyecto
+ El objetivo del proyecto es realizar consultas eficientes ya sea de manera textual o en formato de audio. Por medio, de indices invertidos (SPIMI) y multidimensionales (R-tree, Faiss, etc). En este sentido, se plantea por el lado de busquedas textuales, evaluar la eficiencia entre un indice de PostgreSql y nuestra implementacion, y por el otro lado, ver cual indice multidimensional se acopla mas a la busqueda.|
+ ### Dominio de datos
+#### Para busquedas textuales:
+El dominio de datos esta definido por la siguiente conjunto de datos: [Spotify Songs](https://www.kaggle.com/datasets/imuhammad/audio-features-and-lyrics-of-spotify-songs), el cual esta en el formato de un csv y definido por el siguiente datacard:
 
 
+| Variable                     | Class      | Description                                                                                                                |
+|------------------------------|------------|----------------------------------------------------------------------------------------------------------------------------|
+| track_id                     | character  | Song unique ID                                                                                                             |
+| track_name                   | character  | Song Name                                                                                                                  |
+| track_artist                 | character  | Song Artist                                                                                                                |
+| lyrics                       | character  | Lyrics for the song                                                                                                                                                                                                                                                                                                        |                                  
+|...                                          |...|...
+| duration_ms                  | double     | Duration of song in milliseconds                                                                                            |
+| language                     | character  | Language of the lyrics                                                                                                      |
+ Este dataset cuenta con 18,000 canciones de Spotify
+ #### Para busquedas con formato de audio
+ Por medio del uso de la api de [spotify](https://github.com/spotify-api/spotify-api.js/) y la biblioteca [spotdl](https://github.com/spotDL/spotify-downloader) se lograron descargar un conjunto de canciones de tamaño 5000.
+ Cabe resaltar que ambos datasets no se limitan a un solo idioma, y para mas informacion de como se logro descargar las canciones, vea el apendice A.
+ ## Busqueda textual
+ ### Construccion del indice invertido
+ #### Preprocesamiento
+ Antes realizar la construccion del indice invertido, se realiza una union de los atributos de cada fila del dataset. 
+ ##### Eliminacion de stopwords
+ Por medio de la libreria ```nltk``` filtramos todos los stopwords, con el fin de obtener mayor informatividad. Cabe resaltar que no se hacer un stem a la palabras ya que se desea una precision adecuada.
+```invert_index.py```
+ ```python
+def eliminarStopWords(tokenText):
+    print(os.getcwd())
+    customSW = open(os.path.join(os.path.dirname(__file__), 'stop_words_italian.txt'), 'r')
+    palabras_stoplist = customSW.read()
+    customSW.close()
+    palabras_stoplist = nltk.word_tokenize(palabras_stoplist.lower())
+    stoplist = ["0","1","2","3","4","5","6","7","8","9","_","--", "\\",
+                "^",">",'.',"@","=","$" , '?', '[', ']', '¿',"(",")",
+                '-', '!',"<", '\'',',', ":","``","''", ";", "»", '(-)',
+                "+","0","/", "«", "{", "}", "--", "|","`","~","'","...","..","-",".....","—","'","-","“","…", "‘","#","&","%"]
+    palabras_stoplist += stoplist
+    # Solo eliminar las palabras de parada, sin aplicar el stemmer
+    resultado = [token for token in tokenText if (token not in palabras_stoplist)]
+
+    return resultado
+    
+def preprocesar_textos(texto):
+    tokenText = tokenizar(texto)
+    tokensLst = eliminarStopWords(tokenText)
+
+    return tokensLst
+ ```
+#### Construccion del indice invertido
+
+Dentro de las diferente maneras de implementar un indice invertido, usaremos un spimi, ya que consideramos que es uno de los mas eficientes.
+  <p align="center">
+  <img src="https://github.com/artrivas/db2-project3/blob/main/imgs/spimi.png" width="60%">
+  </p>
+
+Dado a la gigantesca cantidad de datos, separamos la datas en bloques ```(bloques{language})``` , cada bloque tiene una capacidad de 20000 DocId:Freq
+
+```python
+def SPIMIConstruction(self):
+        data = self.loadData()
+        dictTerms = defaultdict(list)
+        block_n = 1
+
+        for idx, row in data.iterrows():
+            if idx % 20000 == 0: print("Estamos en el index ", idx)
+            abstract = row["concatenated"]
+            docID = row["track_id"]
+            tokensAbstract = preprocesar_textos(abstract)
+            #Crear postingList
+            term_freq = defaultdict(int)
+            for term in tokensAbstract:
+                term_freq[term] += 1
+
+            for term, freq in term_freq.items():
+                if sys.getsizeof(dictTerms) > self.BLOCK_LIMIT:
+                    sorted_block = sorted(dictTerms.items(), key=itemgetter(0))
+                    block_name = "bloque-"+str(block_n)+".txt"
+                    block_path = os.path.join(blocks_dir, block_name)
+                    with open(block_path, "w") as file_part:
+                        json.dump(sorted_block, file_part, indent=2)
+                    sorted_block = {} #clear
+                    block_n += 1
+                    dictTerms = defaultdict(list) #clear
+                dictTerms[term].append((docID, freq))
+```
+Acciones:
+1.- Extrae la data
+2.- Calcula la frecuencia de cada termino de cada fila en el orden de entrada y lo almacena en un bloque correspondiente
+
+Una vez ya distribuida la data, se realiza la union de los bloques locales para de esta manera obtener un indice inverso global
+```python
+def index_blocks(self):
+        blocks = []
+        files = self.listFiles()
+        for file_path in files:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                block = json.load(file)
+                blocks.append(block)
+
+        while 1 < len(blocks):
+            merged_blocks = []
+            for i in range(0,len(blocks), 2):
+                if i+1 <len(blocks): #si ya no hay mas con que agarrar, o sea el ultimo
+                    combinados = self.merge(dict(blocks[i]), dict(blocks[i+1]))
+                    merged_blocks.append(combinados)
+                else:#solo append al final
+                    merged_blocks.append(blocks[i])
+            blocks = merged_blocks #actualiza el nuevo merge
+        ordenar_merge = OrderedDict(sorted(blocks[0].items(), key=lambda x: x[0]))
+        return ordenar_merge
+```
+Acciones:
+1.- Se empieza a leer bloque por bloque
+2.- Se juntan los bloques con el fin de generar un indice global
+
+
+### Consultas / Busqueda
+En este proyecto para el calculo de similitud usamos los pesos ```TF-IDF```, cuales procedimientos de calculo se encuentran en ```invert_index.py```, pero en general este es el procedimiento:
+
+1.  **Carga de datos y del índice invertido**
+2.  **Preprocesamiento de la consulta**
+3.  **Cálculo de TF-IDF de la consulta**
+4.  **Generación de vectores de características**
+5.  **Cálculo de similitud de coseno**
+6.  **Ordenamiento de documentos por similitud de coseno**
+7.  **Obtención de los top k resultados**
+```python
+def calculate_tf(query, document):
+    term_frequency = document.count(query)
+    return (1+math.log10(term_frequency))
+
+def calculate_idf(query, documents):
+    document_frequency = sum(1 for document in documents if query in document)
+    return math.log(len(documents) / (document_frequency + 1))
+```
+Una vez ya obtenido DocID:TF-IDF, se puede empezar a aplicar las busquedas por similitud. Cabe resaltar que la metrica que estamos usando es la de un cosine.
+```python
+def cos_Similarity(self, query, cosine_docs):
+        cosine_scores = defaultdict(float)
+        for docId in cosine_docs:
+            doc = cosine_docs[docId]
+            q = query
+            sum_ = 0
+            sum_ += round(np.dot(q/(np.linalg.norm(q)),doc/(np.linalg.norm(doc))),5)
+            cosine_scores[docId] = sum_
+        return cosine_scores
+ ```
+ En este sentido, con las funciones ya implementadas, podemos definir a nuestro topk como:
+ ```python
+  def retrieve_k_nearest(self, query, k, language):
+        ...
+        for term in query:
+            term_data = self.binary_search(term, index_data)
+            if term_data is None:
+                continue
+            idf_query[term] = round(math.log10((len(data)/len(term_data)) + 1),4)
+            for docId_tfidfin in term_data:
+                docId = docId_tfidfin.split(",")[0]
+                tf_idf = docId_tfidfin.split(",")[1]
+                cos_to_evaluar[docId][term] = tf_idf
+                # va guardando en cada doc, el tf idf en orden de los querys keywords
+            tf_ = calculate_tf(term, query)
+            idf_ = idf_query[term]
+            query_tfidf.append(tf_*idf_)
+
+        #Crear vectores caracteristicos
+        cosine_docs = defaultdict(list)
+
+        for docId in cos_to_evaluar:
+            for term in query:
+                if term in cos_to_evaluar[docId]:
+                    cosine_docs[docId].append(float(cos_to_evaluar[docId][term]))
+                else:
+                    cosine_docs[docId].append(0)
+
+        scores = self.cos_Similarity(query_tfidf, cosine_docs)
+
+        # Ordenar los documentos por puntuación de similitud de coseno en orden descendente
+        scores = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)
+        scores = scores[:k]
+        return data.iloc[matching_indices], scores_values, execution_time
+ ```
 
 ## Proyecto parte 3
 
