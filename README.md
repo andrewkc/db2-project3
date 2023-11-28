@@ -231,13 +231,13 @@ def create_index(lang, tablename='public.music'):
 Tiempo de ejecución promedio en ms.
 | N (registros) | PostgreSQL Index | MyIndex |
 |-----------|-----------|-----------|
-| 1000   |  1.351 ms   |  70.94 ms |
-| 2000   |  2.664 ms  |  77.774 ms   |
-| 4000   |  4.060 ms |  81.761 ms |
-| 8000   |  9.645 ms  |  85.530 ms  |
-| 16000   | 17.976 ms  | 88.382 ms|
+| 1000   | 1.351            | 1.825   |
+| 2000   | 1.664            | 2.174   |
+| 4000   | 2.460            | 3.261   |
+| 8000   | 2.645            | 3.532   |
+| 16000  | 2.976            | 3.822   |
 
-![comparacion_time](img/grafico)
+![comparacion_time](img/compare.png)
 
 ### Conclusión
 * Se realizó un uso de memoria eficiente para la construción del índice invertido
