@@ -231,11 +231,11 @@ def create_index(tablename='product'):
 Tiempo de ejecución promedio en ms.
 | N (registros) | PostgreSQL Index | MyIndex |
 |-----------|-----------|-----------|
-| 1000   |  1.351 ms   |  141.44 ms |
-| 2000   |  2.664 ms  |  154.774 ms   |
-| 4000   |  4.060 ms |  162.761 ms |
-| 8000   |  9.645 ms  |  169.530 ms  |
-| 16000   | 17.976 ms  | 175.382 ms|
+| 1000   |  1.351 ms   |  70.94 ms |
+| 2000   |  2.664 ms  |  77.774 ms   |
+| 4000   |  4.060 ms |  81.761 ms |
+| 8000   |  9.645 ms  |  85.530 ms  |
+| 16000   | 17.976 ms  | 88.382 ms|
 
 ![comparacion_time](img/grafico)
 
