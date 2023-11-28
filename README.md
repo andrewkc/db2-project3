@@ -290,6 +290,20 @@ Después del entrenamiento (si es necesario), se añaden los datos al índice ut
 
 ### Experimentación  
 
+| N     | Seq   | Rtree | HighD |
+| ----- | ----- | ----- | ----- |
+| 100  | 0.001 | 0.001 | 0.000 |
+| 500   | 0.002 | 0.001 | 0.001 |
+| 1000  | 0.014 | 0.007 | 0.001 |
+| 2500  | 0.038 | 0.022 | 0.001 |
+| 5000 | 0.050 | 0.066 | 0.001 |
+
+![Experi](img/resultados.png)
+
+### Conclusiones:
+* El índice que ofrece la librería faiss es mejor a comparación de los implementados.
+* Rtree es muy deficiente para dimensionalidades altas.
+* Knn con prioridad es una buena idea si se desea una implementación simple.
 
 
 
